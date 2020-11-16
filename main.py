@@ -3,7 +3,7 @@ import click
 
 
 @click.command()
-@click.argument("input_folder")
+@click.argument("input_file")
 @click.argument("output_file")
 @click.argument("scale_factor")
 def distributed_sampling(input_file, output_file, scale_factor):

@@ -1,18 +1,21 @@
+from typing import List
+
 from dgraph_scaler.mpi import rank, size, comm, NodeType, Tags
+from dgraph_scaler.typing import RawEdge
 
 
-def distribute_edges(input_file: str):
+def distribute_edges(input_file: str) -> List[RawEdge]:
     if rank == NodeType.MASTER:
-        distribute_edges_master(input_file)
+        return distribute_edges_leader(input_file)
     else:
-        distribute_edges_follower()
+        return distribute_edges_follower()
 
 
-def distribute_edges_master(input_file: str):
+def distribute_edges_leader(input_file: str) -> List[RawEdge]:
     with open(input_file) as file:
         total_edges_amount = int(file.readline().rstrip())
         extra_edges = total_edges_amount % size
-        edges_buffer = [None] * (total_edges_amount // size + 1)
+        edges_buffer = [None] * (total_edges_amount // size + 1 if extra_edges else total_edges_amount // 2)
         for follower in range(1, size):
             edges_amount = total_edges_amount // size + 1 if follower < extra_edges else total_edges_amount // size
             for i in range(edges_amount):
@@ -23,5 +26,5 @@ def distribute_edges_master(input_file: str):
         return edges_buffer
 
 
-def distribute_edges_follower():
+def distribute_edges_follower() -> List[RawEdge]:
     return comm.recv(source=NodeType.MASTER, tag=Tags.INITIAL_EDGES)

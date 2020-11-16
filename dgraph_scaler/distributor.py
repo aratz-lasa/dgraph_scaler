@@ -12,27 +12,27 @@ def distribute_edges(input_file: str) -> Tuple[List[RawEdge], PartitionMap]:
 
 
 def distribute_edges_leader(input_file: str) -> Tuple[List[RawEdge], PartitionMap]:
-    # TODO: get a more fair partitioining
-    map = []
     with open(input_file) as file:
+        partition_map = []
         total_edges_amount = int(file.readline().rstrip())
-        edges = [None] * (total_edges_amount // size) * 1.5
-        nodes = [None] * (total_edges_amount // size) * 1.5
-        total_i = 0
-        partition_amount = total_edges_amount // size
-        for node in range(size):
-            i = -1
-            while total_i < total_edges_amount and (i < partition_amount or nodes[i] == nodes[max(0, i - 1)]):
-                total_i += 1
-                edges[i] = file.readline().rstrip()
-                nodes[i] = edges[i].split()[0]
-            map.append(int(nodes[i - 1]))
-            comm.send(edges[:i], node, Tags.INITIAL_EDGES)
+        extra_edges = total_edges_amount % size
+        edges_buffer = [None] * (total_edges_amount // size + 1)
 
         for follower in range(1, size):
-            comm.send(map, follower, Tags.PARTITION_MAP)
+            edges_amount = total_edges_amount // size + 1 if follower < extra_edges else total_edges_amount // size
+            for i in range(edges_amount):
+                edges_buffer[i] = file.readline().rstrip()
+            partition_map.append(int(edges_buffer[i].split()[0]))
+            comm.send(edges_buffer[:i + 1], follower, Tags.INITIAL_EDGES)
 
-        return edges, map
+        for i in range(total_edges_amount // size + 1 if extra_edges else total_edges_amount // 2):
+            edges_buffer[i] = file.readline().rstrip()
+        partition_map.append(int(edges_buffer[i].split()[0]))
+
+        for follower in range(1, size):
+            comm.send(partition_map, follower, Tags.PARTITION_MAP)
+
+        return edges_buffer[:i + 1], partition_map
 
 
 def distribute_edges_follower() -> Tuple[List[RawEdge], PartitionMap]:

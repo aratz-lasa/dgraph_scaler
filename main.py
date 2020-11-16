@@ -1,17 +1,15 @@
 import click
 
-from dgraph_scaler import distributor, sampler, util, mpi
+from dgraph_scaler import distributor, sampler, util
 
 
 @click.command()
 @click.argument("input_file")
 @click.argument("output_file")
-@click.argument("scale_factor")
+@click.argument("scale_factor", type=float)
 def distributed_sampling(input_file, output_file, scale_factor):
-    # TODO
     # Step 1: Read distribute edges and load graph
     edges, partition_map = distributor.distribute_edges(input_file)
-    print(mpi.rank, len(edges), partition_map)
     graph = util.load_graph_from_edges(edges)
     edges = None  # Free memory
     # Step 2: Split factor into sample rounds

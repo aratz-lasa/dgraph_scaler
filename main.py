@@ -1,5 +1,6 @@
-from dgraph_scaler import distributor
 import click
+
+from dgraph_scaler import distributor, sampler, util, mpi
 
 
 @click.command()
@@ -8,13 +9,17 @@ import click
 @click.argument("scale_factor")
 def distributed_sampling(input_file, output_file, scale_factor):
     # TODO
-    # Step 1: Read distribute edges
-    edges = distributor.distribute_edges(input_file)
+    # Step 1: Read distribute edges and load graph
+    edges, partition_map = distributor.distribute_edges(input_file)
+    print(mpi.rank, len(edges), partition_map)
+    graph = util.load_graph_from_edges(edges)
+    edges = None  # Free memory
     # Step 2: Split factor into sample rounds
+    factors = [0.5 for _ in range(int(scale_factor) * 2)] + [scale_factor - int(scale_factor)]
     # Step 3: Run dsitributed sampling
-        # Step 3.0: While rounds
-            # Step 3.1: Run local random edge sampling
-            # Step 3.2: Run distrbuted induction
+    samples = []
+    for factor in factors:
+        samples.append(sampler.sample(graph, factor))
     # Step 4: Locally stitch samples
     # Step 5: Merge distributed samples into master file
     pass

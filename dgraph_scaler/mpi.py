@@ -10,6 +10,7 @@ class NodeType(IntEnum):
 
 class Tags(IntEnum):
     INITIAL_EDGES = auto()
+    PARTITION_MAP = auto()
 
 
 comm = MPI.COMM_WORLD

@@ -1,7 +1,11 @@
-from typing import List
+from typing import List, Set, Tuple
 
 
 RawEdge = str
 RawGraph = List[RawEdge]
 Vertex = int
-PartitionMap = List[Vertex]
+Edge = Tuple[Vertex, Vertex]
+RawPartitionMap = List[Vertex]
+
+Ownership = Set[int]
+Ownerships = List[Ownership]

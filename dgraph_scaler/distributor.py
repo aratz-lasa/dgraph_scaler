@@ -30,13 +30,27 @@ def distribute_edges_leader(input_file: str) -> Tuple[List[RawEdge], PartitionMa
             raw_map[follower] = (int(edges_buffer[0].split()[0]), int(edges_buffer[i].split()[0]))
             comm.send(edges_buffer[:i + 1], follower, Tags.INITIAL_EDGES)
 
-        for follower in range(1, size):
-            comm.send(raw_map, follower, Tags.PARTITION_MAP)
+        new_map = fill_map_gaps(raw_map)
 
-        return edges_buffer[:i + 1], PartitionMap(raw_map)
+        for follower in range(1, size):
+            comm.send(new_map, follower, Tags.PARTITION_MAP)
+
+        return edges_buffer[:i + 1], PartitionMap(new_map)
 
 
 def distribute_edges_follower() -> Tuple[List[RawEdge], PartitionMap]:
     edges = comm.recv(source=NodeType.MASTER, tag=Tags.INITIAL_EDGES)
     raw_map = comm.recv(source=NodeType.MASTER, tag=Tags.PARTITION_MAP)
     return edges, PartitionMap(raw_map)
+
+
+def fill_map_gaps(raw_map):
+    new_map = []
+    prev_last = 0
+    for first, last in raw_map:
+        if first > prev_last:
+            new_map.append((prev_last + 1, last))
+        else:
+            new_map.append((first, last))
+        prev_last = last
+    return new_map

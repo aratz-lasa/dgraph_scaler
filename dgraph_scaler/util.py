@@ -1,3 +1,5 @@
+import itertools
+import string
 from typing import List
 
 import networkx as nx
@@ -22,3 +24,14 @@ class PartitionMap:
 
 def load_graph_from_edges(edges: List[RawEdge]) -> nx.MultiDiGraph:
     return nx.parse_edgelist(edges, nodetype=int, create_using=nx.MultiDiGraph)
+
+
+def relabel_samples(samples):
+    prefixes = [l for l in string.ascii_lowercase]
+    i = 2
+    while len(prefixes) < len(samples):
+        prefixes.extend(map(lambda n: "".join(n), itertools.permutations(string.ascii_lowercase, i)))
+        i += 1
+    for i, sample in enumerate(samples):
+        prefix = prefixes[i]
+        nx.relabel_nodes(sample, lambda n: prefix + str(n), copy=False)

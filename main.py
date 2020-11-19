@@ -1,16 +1,20 @@
+import time
+
 import click
 
-from dgraph_scaler import distributor, sampler, util, mpi
+from dgraph_scaler import distributor, sampler, util, mpi, stitcher, merger
 
 
 @click.command()
 @click.argument("input_file")
 @click.argument("output_file")
 @click.argument("scale_factor", type=float)
-def distributed_sampling(input_file, output_file, scale_factor):
+@click.option('-bn', '--bridges-number', default=1, type=int)
+def distributed_sampling(input_file, output_file, scale_factor, bridges_number):
+    start_time = time.time()
+
     # Step 1: Read distribute edges and load graph
     edges, partition_map = distributor.distribute_edges(input_file)
-    print(f"{mpi.rank} {partition_map}")
     graph = util.load_graph_from_edges(edges)
     edges = None  # Free memory
     # Step 2: Split factor into sample rounds
@@ -19,9 +23,14 @@ def distributed_sampling(input_file, output_file, scale_factor):
     samples = []
     for factor in factors:
         samples.append(sampler.sample(graph, factor, partition_map))
-    # Step 4: Locally stitch samples
+    # Step 4: Rename vertices
+    util.relabel_samples(samples)
+    # Step 5: Stitch samples locally and distributively
+    stitcher.stitch_samples(samples, bridges_number)
     # Step 5: Merge distributed samples into master file
-    pass
+    merger.dump_samples(samples, output_file)
+
+    print(time.time() - start_time)
 
 
 if __name__ == "__main__":
@@ -29,5 +38,5 @@ if __name__ == "__main__":
 
 """
 Command example:
-> python3.6 main.py datasets/ordered/facebook.edges samples/facebook.sample 2.5
+>  python3.6 main.py datasets/ordered/facebook.edges samples/facebook 2.5
 """

@@ -24,7 +24,7 @@ def local_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
 
 
 def distributed_stitching_v2(samples: List[nx.MultiDiGraph], bridges_amount: int):
-    raw_samples = [list(s.nodes) for s in samples]
+    raw_samples = [s.nodes for s in samples]
     my_remote_heads = [random.sample(random.choice(raw_samples), k=bridges_amount) for _ in range(mpi.size)]
 
     tails = [random.sample(random.choice(raw_samples), k=bridges_amount) for _ in range(mpi.size)]
@@ -33,6 +33,7 @@ def distributed_stitching_v2(samples: List[nx.MultiDiGraph], bridges_amount: int
         samples[0].add_edges_from(zip(remote_heads[i], tails[i]))
 
     mpi.comm.barrier()
+
 
 def distributed_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
     my_remote_heads = [random.sample(random.choice(samples).nodes, k=bridges_amount) for _ in range(mpi.size)]

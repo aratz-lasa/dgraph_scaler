@@ -34,6 +34,6 @@ def relabel_samples(samples):
         i += 1
     for i in range(len(samples)):
         prefix = prefixes[i]
-        edges = map(lambda e: (prefix + str(e[0]), prefix + str(e[1])), samples[i].edges)
+        edges = map(lambda e: (prefix + str(e[0]), prefix + str(e[1])), list(samples[i].edges))
         samples[i] = g = nx.MultiDiGraph()
         g.add_edges_from(edges)

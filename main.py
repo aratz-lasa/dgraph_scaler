@@ -21,7 +21,9 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges_number):
     factors = [0.5 for _ in range(int(scale_factor) * 2)] + [scale_factor - int(scale_factor)]
     # Step 3: Run dsitributed sampling
     samples = []
-    for factor in factors:
+    for i, factor in enumerate(factors):
+        if mpi.rank == 0:
+            print(f"Sampling {i}/{len(factors)}")
         samples.append(sampler.sample(graph, factor, partition_map))
     # Step 4: Rename vertices
     util.relabel_samples(samples)

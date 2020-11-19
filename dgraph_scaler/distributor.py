@@ -1,3 +1,4 @@
+import math
 from typing import List, Tuple
 
 from dgraph_scaler.mpi import rank, size, comm, NodeType, Tags
@@ -47,10 +48,12 @@ def distribute_edges_follower() -> Tuple[List[RawEdge], PartitionMap]:
 def fill_map_gaps(raw_map):
     new_map = []
     prev_last = 0
-    for first, last in raw_map:
+    for i, limit in enumerate(raw_map):
+        first, last = limit
         if first > prev_last:
-            new_map.append((prev_last + 1, last))
-        else:
-            new_map.append((first, last))
+            first = prev_last + 1
+        if i == len(raw_map) - 1:
+            last = math.inf
+        new_map.append((first, last))
         prev_last = last
     return new_map

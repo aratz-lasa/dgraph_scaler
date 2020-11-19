@@ -22,7 +22,6 @@ def distribute_edges_leader(input_file: str) -> Tuple[List[RawEdge], PartitionMa
         edges_buffer = [None] * (total_edges_amount // size + 1)
         for i in range(edges_amount[rank]):
             edges_buffer[i] = file.readline().rstrip()
-
     my_mapping = (int(edges_buffer[0].split()[0]), int(edges_buffer[i].split()[0]))
 
     raw_map = comm.alltoall([my_mapping] * (size))

@@ -24,12 +24,11 @@ def local_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
 
 
 def distributed_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
-    my_remote_heads = random.sample(samples[0].nodes, k=bridges_amount)  # Head that other nodes will connect to
-    tails = random.sample(samples[0].nodes, k=bridges_amount)
-    dest = mpi.size - 1 if mpi.rank == 0 else mpi.rank - 1
-    source = 0 if mpi.rank == mpi.size - 1 else mpi.rank + 1
-    mpi.comm.bsend(my_remote_heads, dest=dest, tag=mpi.Tags.STITCHING)
-    remote_heads = mpi.comm.recv(source=source, tag=mpi.Tags.STITCHING)
-    samples[0].add_edges_from(zip(tails, remote_heads))
+    my_remote_heads = [random.sample(random.choice(samples).nodes, k=bridges_amount) for _ in range(mpi.size)]
+
+    tails = [random.sample(random.choice(samples).nodes, k=bridges_amount) for _ in range(mpi.size)]
+    remote_heads = mpi.comm.alltoall(my_remote_heads)
+    for i in range(mpi.size):
+        samples[0].add_edges_from(zip(remote_heads[i], tails[i]))
 
     mpi.comm.barrier()

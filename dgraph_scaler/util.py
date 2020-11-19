@@ -32,6 +32,6 @@ def relabel_samples(samples):
     while len(prefixes) < len(samples):
         prefixes.extend(map(lambda n: "".join(n), itertools.permutations(string.ascii_lowercase, i)))
         i += 1
-    for i, sample in enumerate(samples):
+    for i in range(len(samples)):
         prefix = prefixes[i]
-        nx.relabel_nodes(sample, lambda n: prefix + str(n), copy=False)
+        samples[i] = nx.relabel_nodes(samples[i], lambda n: prefix + str(n))

@@ -10,7 +10,8 @@ from dgraph_scaler import distributor, sampler, util, mpi, stitcher, merger
 @click.argument("output_file")
 @click.argument("scale_factor", type=float)
 @click.option('-bn', '--bridges-number', default=1, type=int)
-def distributed_sampling(input_file, output_file, scale_factor, bridges_number):
+@click.option('-fs', '--factor-size', default=0.5, type=float)
+def distributed_sampling(input_file, output_file, scale_factor, bridges_number, factor_size):
     total_t = time.time()
 
     # Step 1: Read distribute edges and load graph
@@ -21,8 +22,11 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges_number):
     if mpi.rank == 0:
         print("Loading time:", time.time() - loading_t)
     # Step 2: Split factor into sample rounds
-    factors = [0.5 for _ in range(int(scale_factor) * 2)] + [scale_factor - int(scale_factor)]
-    # Step 3: Run dsitributed sampling
+    factors = [factor_size for _ in range(int(scale_factor / factor_size))]
+    remaining_factor = scale_factor - round(sum(factors), 2)
+    if remaining_factor:
+        factors.append(remaining_factor)
+    # Step 3: Run distributed sampling
     samples = []
     for i, factor in enumerate(factors):
         sampling_t = time.time()

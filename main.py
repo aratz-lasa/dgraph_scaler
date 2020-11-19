@@ -23,7 +23,7 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges_number):
     samples = []
     for i, factor in enumerate(factors):
         if mpi.rank == 0:
-            print(f"Sampling {i}/{len(factors)}")
+            print(f"Sampling {i+1}/{len(factors)}")
         samples.append(sampler.sample(graph, factor, partition_map))
     # Step 4: Rename vertices
     util.relabel_samples(samples)
@@ -32,7 +32,8 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges_number):
     # Step 5: Merge distributed samples into master file
     merger.dump_samples(samples, output_file)
 
-    print(time.time() - start_time)
+    if mpi.rank==0:
+        print(time.time() - start_time)
 
 
 if __name__ == "__main__":

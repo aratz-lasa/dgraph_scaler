@@ -6,12 +6,9 @@ from dgraph_scaler.typing import RawEdge
 from dgraph_scaler.util import PartitionMap
 
 
-def distribute_edges(input_file: str) -> Tuple[List[RawEdge], PartitionMap]:
-    return distribute_edges_leader(input_file)
-
-
-def distribute_edges_leader(input_file: str) -> Tuple[List[RawEdge], PartitionMap]:
+def distribute_edges(input_file: str) -> Tuple[List[RawEdge], PartitionMap, int]:
     with open(input_file) as file:
+        total_nodes_amount = int(file.readline().rstrip())
         total_edges_amount = int(file.readline().rstrip())
         edges_amount = [total_edges_amount // size] * size
         for i in range(total_edges_amount % size):
@@ -26,7 +23,7 @@ def distribute_edges_leader(input_file: str) -> Tuple[List[RawEdge], PartitionMa
 
     raw_map = comm.alltoall([my_mapping] * (size))
     raw_map = fill_map_gaps(raw_map)
-    return edges_buffer[:i + 1], PartitionMap(raw_map)
+    return edges_buffer[:i + 1], PartitionMap(raw_map), total_nodes_amount
 
 
 def fill_map_gaps(raw_map):

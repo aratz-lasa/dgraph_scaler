@@ -1,3 +1,4 @@
+import itertools
 import random
 from typing import List
 
@@ -15,24 +16,23 @@ def local_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
     samples_amount = len(samples)
     if samples_amount < 2:
         return
+    tails = [[random.choices(list(sample.nodes), k=bridges_amount) for _ in range(len(samples))] for sample in samples]
+    heads = [[random.choices(list(sample.nodes), k=bridges_amount) for _ in range(len(samples))] for sample in samples]
     for i, sample in enumerate(samples):
-        if i == samples_amount - 1:
-            destination = samples[0]
-        else:
-            destination = samples[i + 1]
-        tails = random.sample(sample.nodes, k=bridges_amount//2)
-        heads = random.sample(destination.nodes, k=bridges_amount//2)
-        sample.add_edges_from(zip(tails, heads))
+        for j in range(len(samples)):
+            sample.add_edges_from(zip(tails[i][j], heads[j][i]))
 
 
 def distributed_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
-    raw_samples = [list(s.nodes) for s in samples]
-    my_remote_heads = [random.sample(random.choice(raw_samples), k=bridges_amount//2) for _ in range(mpi.size)]
+    raw_samples = []
+    for sample in samples:
+        raw_samples.extend(sample.nodes)
+    random.shuffle(raw_samples)
+    my_remote_heads = [random.choices(raw_samples, k=bridges_amount) for _ in range(mpi.size)]
 
-    tails = [random.sample(random.choice(raw_samples), k=bridges_amount//2) for _ in range(mpi.size)]
+    tails = [random.choices(random.choice(raw_samples), k=bridges_amount) for _ in range(mpi.size)]
     remote_heads = mpi.comm.alltoall(my_remote_heads)
     for i in range(mpi.size):
-        if i != mpi.rank:
-            samples[0].add_edges_from(zip(remote_heads[i], tails[i]))
+        samples[0].add_edges_from(zip(remote_heads[i], tails[i]))
 
     mpi.comm.barrier()

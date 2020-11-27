@@ -1,4 +1,3 @@
-import itertools
 import random
 from typing import List
 
@@ -7,7 +6,9 @@ import networkx as nx
 from dgraph_scaler import mpi
 
 
-def stitch_samples(samples: List[nx.MultiDiGraph], bridges_amount: int):
+def stitch_samples(samples: List[nx.MultiDiGraph], bridges_percent: float):
+    bridges_amount = int(samples[0].number_of_nodes() * bridges_percent)
+    # bridges_amount = int(min(samples[0].number_of_nodes(), samples[-1].number_of_nodes())*bridges_percent)
     local_stitching(samples, bridges_amount)
     distributed_stitching(samples, bridges_amount)
 
@@ -30,9 +31,10 @@ def distributed_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
     random.shuffle(raw_samples)
     my_remote_heads = [random.choices(raw_samples, k=bridges_amount) for _ in range(mpi.size)]
 
-    tails = [random.choices(random.choice(raw_samples), k=bridges_amount) for _ in range(mpi.size)]
+    tails = [random.choices(raw_samples, k=bridges_amount) for _ in range(mpi.size)]
     remote_heads = mpi.comm.alltoall(my_remote_heads)
     for i in range(mpi.size):
-        samples[0].add_edges_from(zip(remote_heads[i], tails[i]))
+        bridges_amount_i = min(len(remote_heads[i]), len(tails[i]))
+        samples[0].add_edges_from(zip(remote_heads[i][:bridges_amount_i], tails[i][:bridges_amount_i]))
 
     mpi.comm.barrier()

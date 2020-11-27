@@ -11,11 +11,11 @@ from dgraph_scaler import distributor, sampler, util, mpi, stitcher, merger
 @click.argument("input_file")
 @click.argument("output_file")
 @click.argument("scale_factor", type=float)
-@click.option('-bn', '--bridges-number', default=1, type=int)
+@click.option('-b', '--bridges', default=0.1, type=float)
 @click.option('-fs', '--factor-size', default=0.5, type=float)
-@click.option('-p', '--precision', default=0.9, type=float)
+@click.option('-p', '--precision', default=0.95, type=float)
 @click.option('-c', '--connect', is_flag=True, )
-def distributed_sampling(input_file, output_file, scale_factor, bridges_number, factor_size, precision, connect):
+def distributed_sampling(input_file, output_file, scale_factor, bridges, factor_size, precision, connect):
     total_t = time.time()
 
     # Step X: Read distribute edges and load graph
@@ -29,6 +29,7 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges_number, 
     nodes_amount = mpi.comm.alltoall([graph.number_of_nodes()]*mpi.size)
     weights = list(map(lambda a: ceil(a/sum(nodes_amount) * 100) / 100.0, nodes_amount))
     # Step X: Split factor into sample rounds
+    factor_size = min(factor_size, scale_factor)
     factors = [factor_size for _ in range(int(scale_factor / factor_size))]
     remaining_factor = scale_factor - round(sum(factors), 2)
     if remaining_factor:
@@ -54,7 +55,7 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges_number, 
         print(f"Relabeling time:", time.time() - relabeling_t)
     # Step X: Stitch samples locally and distributively
     stitching_t = time.time()
-    stitcher.stitch_samples(samples, bridges_number)
+    stitcher.stitch_samples(samples, bridges)
     if mpi.rank == 0:
         print(f"Stiching time:", time.time() - stitching_t)
     # Step X: Merge distributed samples into master file

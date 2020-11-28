@@ -60,7 +60,7 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges, factor_
         print(f"Stiching time:", time.time() - stitching_t)
     # Step X: Merge distributed samples into master file
     dumping_t = time.time()
-    merger.dump_samples(samples, output_file)
+    merger.merge_samples(samples, output_file)
     if mpi.rank == 0:
         print(f"Dumping time:", time.time() - dumping_t)
 

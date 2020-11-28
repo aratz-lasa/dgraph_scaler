@@ -15,6 +15,7 @@ class Tags(IntEnum):
     EDGE_QUERY = auto()
     EDGE_RESPONSE = auto()
     STITCHING = auto()
+    MERGE = auto()
 
 
 PICKLE_SET_OVERHEAD = 31

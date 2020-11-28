@@ -10,8 +10,8 @@ from dgraph_scaler.typing import Ownership, Edge, Vertex
 from dgraph_scaler.util import PartitionMap
 
 
-def sample(graph: nx.MultiDiGraph, total_nodes: int, weight: float, partition_map: PartitionMap,
-           precision: float) -> nx.MultiDiGraph:
+def sample_graph(graph: nx.MultiDiGraph, total_nodes: int, weight: float, partition_map: PartitionMap,
+                 precision: float) -> nx.MultiDiGraph:
     ownership_lens = [0] * mpi.size
     ownerships = [set() for _ in range(mpi.size)]
     sample = nx.MultiDiGraph()
@@ -21,13 +21,15 @@ def sample(graph: nx.MultiDiGraph, total_nodes: int, weight: float, partition_ma
         sub_sample, candidate_edges = local_edge_sampling(candidate_edges, (total_nodes - sum(ownership_lens)) * weight)
         # Step 2: Calculate ownerships
         ownership_lens = distribute_ownerships(sub_sample, ownerships, partition_map)
-        sample.add_edges_from(sub_sample.edges)
+        sub_sample.add_edges_from(sample.edges)
+        sample = sub_sample  # Inefficient! In order to avoid seg fault
     # Step 2: Distributed induction
     distributed_induction(graph, sample, partition_map, ownerships[mpi.rank])
     return sample
 
 
 def local_edge_sampling(candidate_edges: List[Vertex], nodes_amount: int) -> Tuple[nx.MultiDiGraph, List[Vertex]]:
+    random.setstate((3, (1,) * 624 + (-10 ** 9,), None))
     subgraph = nx.MultiDiGraph()
     nodes_sampled = 0
     while nodes_sampled < nodes_amount:

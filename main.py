@@ -38,7 +38,7 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges, factor_
     samples = []
     for i, factor in enumerate(factors):
         sampling_t = time.time()
-        samples.append(sampler.sample(graph, int(total_nodes*factor), weights[mpi.rank], partition_map, precision))
+        samples.append(sampler.sample_graph(graph, int(total_nodes * factor), weights[mpi.rank], partition_map, precision))
         if mpi.rank == 0:
             print(f"Sampling time {i + 1}/{len(factors)}:", time.time() - sampling_t)
     # Step X: Connect the graph

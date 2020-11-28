@@ -29,7 +29,6 @@ def sample_graph(graph: nx.MultiDiGraph, total_nodes: int, weight: float, partit
 
 
 def local_edge_sampling(candidate_edges: List[Vertex], nodes_amount: int) -> Tuple[nx.MultiDiGraph, List[Vertex]]:
-    random.setstate((3, (1,) * 624 + (-10 ** 9,), None))
     subgraph = nx.MultiDiGraph()
     nodes_sampled = 0
     while nodes_sampled < nodes_amount:

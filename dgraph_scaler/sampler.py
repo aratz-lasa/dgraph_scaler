@@ -22,8 +22,6 @@ def sample(graph: nx.MultiDiGraph, total_nodes: int, weight: float, partition_ma
         # Step 2: Calculate ownerships
         ownership_lens = distribute_ownerships(sub_sample, ownerships, partition_map)
         sample.add_edges_from(sub_sample.edges)
-    if mpi.rank==0:
-        print(f"Sampled amount: {sum(ownership_lens)} - Expected min: {total_nodes * precision}")
     # Step 2: Distributed induction
     distributed_induction(graph, sample, partition_map, ownerships[mpi.rank])
     return sample

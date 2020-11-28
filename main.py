@@ -65,7 +65,7 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges, factor_
         print(f"Dumping time:", time.time() - dumping_t)
 
     if mpi.rank == 0:
-        print(time.time() - total_t)
+        print("Total time:", time.time() - total_t)
 
 
 if __name__ == "__main__":

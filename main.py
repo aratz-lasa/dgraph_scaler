@@ -40,29 +40,29 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges, factor_
         sampling_t = time.time()
         samples.append(sampler.sample_graph(graph, int(total_nodes * factor), weights[mpi.rank], partition_map, precision))
         if mpi.rank == 0:
-            print(f"Sampling time {i + 1}/{len(factors)}:", time.time() - sampling_t)
+            print("Sampling time", (i + 1)/len(factors),":", time.time() - sampling_t)
     # Step X: Connect the graph
     if connect:
         connecting_t = time.time()
         for sample in samples:
             sample.add_edges_from(nx.k_edge_augmentation(nx.Graph(sample), 1))
         if mpi.rank == 0:
-            print(f"Connecting time:", time.time() - connecting_t)
+            print("Connecting time:", time.time() - connecting_t)
     # Step X: Rename vertices
     relabeling_t = time.time()
     util.relabel_samples(samples)
     if mpi.rank == 0:
-        print(f"Relabeling time:", time.time() - relabeling_t)
+        print("Relabeling time:", time.time() - relabeling_t)
     # Step X: Stitch samples locally and distributively
     stitching_t = time.time()
     stitcher.stitch_samples(samples, bridges)
     if mpi.rank == 0:
-        print(f"Stiching time:", time.time() - stitching_t)
+        print("Stiching time:", time.time() - stitching_t)
     # Step X: Merge distributed samples into master file
     dumping_t = time.time()
     merger.merge_samples(samples, output_file)
     if mpi.rank == 0:
-        print(f"Dumping time:", time.time() - dumping_t)
+        print("Dumping time:", time.time() - dumping_t)
 
     if mpi.rank == 0:
         print("Total time:", time.time() - total_t)

@@ -15,7 +15,7 @@ def merge_samples(samples: List[nx.MultiDiGraph], output_file: str, mpi: GraphMP
 def merge_samples_master(samples: List[nx.MultiDiGraph], output_file: str, mpi: GraphMPI):
     with open(output_file, "w") as file:
         for sample in samples:
-            file.writelines(map(lambda e: f"{e[0]} {e[1]}\n", sample.edges))
+            file.writelines(map(lambda e: "{} {}\n".format(*e), sample.edges))
         for node in range(mpi.size):
             if node != mpi.rank:
                 edges = mpi.comm.recv(source=node, tag=Tags.MERGE)
@@ -25,5 +25,5 @@ def merge_samples_master(samples: List[nx.MultiDiGraph], output_file: str, mpi: 
 def merge_samples_follower(samples: List[nx.MultiDiGraph], mpi: GraphMPI):
     edges = []
     for sample in samples:
-        edges.extend(map(lambda e: f"{e[0]} {e[1]}\n", sample.edges))
+        edges.extend(map(lambda e: "{} {}\n".format(*e), sample.edges))
     mpi.comm.send(edges, dest=0, tag=Tags.MERGE)

@@ -3,14 +3,14 @@ from typing import List
 
 import networkx as nx
 
-from dgraph_scaler import mpi
+from dgraph_scaler.mpi_util import GraphMPI
 
 
-def stitch_samples(samples: List[nx.MultiDiGraph], bridges_percent: float):
+def stitch_samples(samples: List[nx.MultiDiGraph], bridges_percent: float, mpi: GraphMPI):
     bridges_amount = int(samples[0].number_of_nodes() * bridges_percent)
     # bridges_amount = int(min(samples[0].number_of_nodes(), samples[-1].number_of_nodes())*bridges_percent)
     local_stitching(samples, bridges_amount)
-    distributed_stitching(samples, bridges_amount)
+    distributed_stitching(samples, bridges_amount, mpi)
 
 
 def local_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
@@ -24,7 +24,7 @@ def local_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
             sample.add_edges_from(zip(tails[i][j], heads[j][i]))
 
 
-def distributed_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
+def distributed_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int, mpi: GraphMPI):
     raw_samples = []
     for sample in samples:
         raw_samples.extend(sample.nodes)

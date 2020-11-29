@@ -15,7 +15,8 @@ from dgraph_scaler import distributor, sampler, util, mpi, stitcher, merger
 @click.option('-fs', '--factor-size', default=0.5, type=float)
 @click.option('-p', '--precision', default=0.95, type=float)
 @click.option('-c', '--connect', is_flag=True, )
-def distributed_sampling(input_file, output_file, scale_factor, bridges, factor_size, precision, connect):
+@click.option('-nfs', '--merge-nfs', is_flag=True, )
+def distributed_sampling(input_file, output_file, scale_factor, bridges, factor_size, precision, connect, merge_nfs):
     total_t = time.time()
 
     # Step X: Read distribute edges and load graph
@@ -60,7 +61,7 @@ def distributed_sampling(input_file, output_file, scale_factor, bridges, factor_
         print(f"Stiching time:", time.time() - stitching_t)
     # Step X: Merge distributed samples into master file
     dumping_t = time.time()
-    merger.merge_samples(samples, output_file)
+    merger.merge_samples(samples, output_file, merge_nfs)
     if mpi.rank == 0:
         print(f"Dumping time:", time.time() - dumping_t)
 

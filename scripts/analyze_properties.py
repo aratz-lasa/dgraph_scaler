@@ -6,14 +6,14 @@ import snap
 
 
 @click.command()
-@click.argument("input_folder")
+@click.argument("experiments_folder")
 @click.option("-e", "--extension", default=None, help="Extension of files that contain edges")
 @click.option("-nx", "--use-networkx", is_flag=True)
-def load_analyze_properties(input_folder, extension, use_networkx):
+def load_analyze_properties(experiments_folder, extension, use_networkx):
     if use_networkx:
-        analyze_with_networkx(extension, input_folder)
+        analyze_with_networkx(extension, experiments_folder)
     else:
-        analyze_with_sanppy(extension, input_folder)
+        analyze_with_sanppy(extension, experiments_folder)
 
 
 def analyze_with_sanppy(extension, input_folder):
@@ -50,7 +50,7 @@ def analyze_with_sanppy(extension, input_folder):
     ef_diam_l, ef_diam_h, diam, sp = snap.GetBfsEffDiamAll(graph, 10, True)
     print(f"Average shortest-path: {sp}")
     print(f"Diameter: {diam}")
-    print(f"Effective diameter: {ef_diam_l} - {ef_diam_h}")
+    print(f"Density: {snap.CntUniqDirEdges(graph)/(snap.CntNonZNodes(graph)*snap.CntNonZNodes(graph))}")
     # TODO: a more efficient diameter: print(f"Diameter: {nx.diameter(undir_graph)}")
 
 

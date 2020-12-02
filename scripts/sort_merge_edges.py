@@ -6,18 +6,18 @@ import click
 @click.command()
 @click.argument("input_folder")
 @click.argument("output_file")
-@click.option("-e", "--extension", default=".*", help="Extension of files that contain edges")
+@click.option("-e", "--extension", default=None, help="Extension of files that contain edges")
 @click.option("-na", "--nodes-amount", default=None, type=int)
 def order_merge_edges(input_folder, output_file, extension, nodes_amount):
     merged_lines = []
-    files_amount = len(list(filter(lambda f: f.endswith(extension), os.listdir(input_folder))))
     files_read = 0
     for file in os.listdir(input_folder):
-        if file.endswith(extension):
-            files_read+=1
-            print(f"Loading {os.path.join(input_folder, file)}. {files_read}/{files_amount}")
+        if not extension or file.endswith(extension):
+            files_read += 1
+            print(f"Loading {os.path.join(input_folder, file)}")
             with open(os.path.join(input_folder, file)) as file:
                 merged_lines.extend(file.readlines())
+            print(f"Loading {os.path.join(input_folder, file)}")
     with open(output_file, "w") as file:
         if nodes_amount:
             file.write(f"{nodes_amount}\n")

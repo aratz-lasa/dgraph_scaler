@@ -81,8 +81,6 @@ def get_properties_with_sanppy(extension, input_folder):
         if not extension or file.endswith(extension):
             files_read += 1
             with open(os.path.join(input_folder, file)) as file:
-                file.readline()  # Read nodes amount
-                file.readline()  # Read edges amount
                 for line in file.readlines():
                     edge = line.rstrip().split()
                     n1 = id_map.get(edge[0], next_id)

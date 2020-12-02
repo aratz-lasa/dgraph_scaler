@@ -7,7 +7,7 @@ import networkx as nx
 
 from dgraph_scaler import mpi
 from dgraph_scaler.typing import Ownership, Edge, Vertex
-from dgraph_scaler.util import PartitionMap
+from dgraph_scaler.util import PartitionMap, choices
 
 
 def sample(graph: nx.MultiDiGraph, total_nodes: int, weight: float, partition_map: PartitionMap,
@@ -31,7 +31,7 @@ def local_edge_sampling(candidate_edges: List[Vertex], nodes_amount: int) -> Tup
     subgraph = nx.MultiDiGraph()
     nodes_sampled = 0
     while nodes_sampled < nodes_amount:
-        subgraph.add_edges_from(random.choices(candidate_edges, k=ceil((nodes_amount - nodes_sampled) / 2)))
+        subgraph.add_edges_from(choices(candidate_edges, k=ceil((nodes_amount - nodes_sampled) / 2)))
         nodes_sampled = subgraph.number_of_nodes()
     candidate_edges = list(filter(lambda e: not subgraph.has_edge(*e), candidate_edges))
     return subgraph, candidate_edges

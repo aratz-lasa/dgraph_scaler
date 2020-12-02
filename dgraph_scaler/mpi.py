@@ -1,4 +1,4 @@
-from enum import IntEnum, auto
+from enum import IntEnum
 
 from mpi4py import MPI
 
@@ -9,20 +9,20 @@ class NodeType(IntEnum):
 
 
 class Tags(IntEnum):
-    INITIAL_EDGES = auto()
-    PARTITION_MAP = auto()
-    OWNERSHIPS = auto()
-    EDGE_QUERY = auto()
-    EDGE_RESPONSE = auto()
-    STITCHING = auto()
-    MERGE = auto()
+    INITIAL_EDGES = 0
+    PARTITION_MAP = 1
+    OWNERSHIPS = 2
+    EDGE_QUERY = 3
+    EDGE_RESPONSE = 4
+    STITCHING = 5
+    MERGE = 6
 
 
 PICKLE_SET_OVERHEAD = 31
 PICKLE_LIST_OVERHEAD = 6
 PICKLE_TUPLE_OVERHEAD = 3
 PICKLE_BIG_INT_OVERHEAD = 25
-MAX_NODES = 200_000
+MAX_NODES = 200000
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()

@@ -40,7 +40,7 @@ def run_properties_experiments(input_file, results_folder, output_file, measurem
     for factor in scaling_factors:
         for i in range(measurements):
             if mpi.rank == 0:
-                print(f"Running experiment {factor} - {i + 1}/{measurements}")
+                print("Running experiment: {} - {}/{}".format(factor, i + 1, measurements),)
             scaler.scale(input_file, results_folder, factor, bridges, factor_size, precision, connect, merge_nfs,
                          verbose)
             if mpi.rank == 0:

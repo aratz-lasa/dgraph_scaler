@@ -14,7 +14,7 @@ def merge_samples(samples: List[nx.MultiDiGraph], output_file: str, nfs: bool):
 
 def merge_nfs(samples: List[nx.MultiDiGraph], output_file: str):
     for i, sample in enumerate(samples):
-        nx.write_edgelist(sample, f"{output_file}.{mpi.rank}.{i}.txt", data=False)
+        nx.write_edgelist(sample, "{}.{}.{}.txt".format(output_file, mpi.rank, i), data=False)
 
 
 def merge_centralized(samples: List[nx.MultiDiGraph], output_file: str):
@@ -25,9 +25,9 @@ def merge_centralized(samples: List[nx.MultiDiGraph], output_file: str):
 
 
 def merge_samples_master(samples: List[nx.MultiDiGraph], output_file: str):
-    with open(f"{output_file}.txt", "w") as file:
+    with open("{}.txt".format(output_file), "w") as file:
         for sample in samples:
-            file.writelines(map(lambda e: f"{e[0]} {e[1]}\n", sample.edges))
+            file.writelines(map(lambda e: "{} {}\n".format(e[0], e[1]), sample.edges))
         for node in range(mpi.size):
             if node != mpi.rank:
                 edges = mpi.comm.recv(source=node, tag=mpi.Tags.MERGE)
@@ -37,5 +37,5 @@ def merge_samples_master(samples: List[nx.MultiDiGraph], output_file: str):
 def merge_samples_follower(samples: List[nx.MultiDiGraph]):
     edges = []
     for sample in samples:
-        edges.extend(map(lambda e: f"{e[0]} {e[1]}\n", sample.edges))
+        edges.extend(map(lambda e: "{} {}\n".format(e[0], e[1]), sample.edges))
     mpi.comm.send(edges, dest=0, tag=mpi.Tags.MERGE)

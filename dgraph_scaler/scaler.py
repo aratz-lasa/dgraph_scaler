@@ -38,6 +38,7 @@ def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, p
     graph = util.load_graph_from_edges(edges)
     edges = None  # Free memory
     if verbose and mpi.rank == 0:
+        print("=================================")
         print("Loading time:", round(time.time() - loading_t, 2), "seconds")
         print("=================================")
     # Step X: Calculate weights (how many % of the nodes to sample) for each node
@@ -83,6 +84,7 @@ def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, p
     merger.merge_samples(samples, output_file, merge_nfs)
     if verbose and mpi.rank == 0:
         print("Dumping time:", round(time.time() - dumping_t, 2), "seconds")
+        print("=================================")
         print()
         print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
 

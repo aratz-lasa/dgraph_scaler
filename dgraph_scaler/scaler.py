@@ -13,7 +13,7 @@ def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, p
         print("""
   ______  ______ _______  _____  _     _      _______ _______ _______        _______  ______
  |  ____ |_____/ |_____| |_____] |_____|      |______ |       |_____| |      |______ |_____/
- |_____| |    \_ |     | |       |     |      ______| |_____  |     | |_____ |______ |    \_ █0.1█
+ |_____| |    \_ |     | |       |     |      ______| |_____  |     | |_____ |______ |    \_ |0.1|
 """)
         print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
         print(
@@ -83,7 +83,9 @@ def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, p
     merger.merge_samples(samples, output_file, merge_nfs)
     if verbose and mpi.rank == 0:
         print("Dumping time:", round(time.time() - dumping_t, 2), "seconds")
-        print("=================================")
+        print()
+        print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
 
     if verbose and mpi.rank == 0:
-        print("Total time:", round(time.time() - total_t, 2), "seconds")
+        print("▬▬▬", "Total time:", round(time.time() - total_t, 2), "seconds", "▬▬▬▬")
+        print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬")

@@ -60,7 +60,18 @@ def all_to_all_local_stitching(samples: List[nx.MultiDiGraph], bridges_amount: i
 
 
 def all_to_all_distributed_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):
-    return
+    raw_samples = []
+    for sample in samples:
+        raw_samples.extend(sample.nodes)
+    random.shuffle(raw_samples)
+    my_remote_heads = [choices(raw_samples, k=bridges_amount) for _ in range(mpi.size)]
+
+    tails = [choices(raw_samples, k=bridges_amount) for _ in range(mpi.size)]
+    remote_heads = mpi.comm.alltoall(my_remote_heads)
+    for i in range(mpi.size):
+        if i != mpi.rank:
+            bridges_amount_i = min(len(remote_heads[i]), len(tails[i]))
+            samples[0].add_edges_from(zip(remote_heads[i][:bridges_amount_i], tails[i][:bridges_amount_i]))
 
 
 def ring_local_stitching(samples: List[nx.MultiDiGraph], bridges_amount: int):

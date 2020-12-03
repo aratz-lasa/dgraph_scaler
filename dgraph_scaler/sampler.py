@@ -72,4 +72,3 @@ def query_inductions(sample: nx.MultiDiGraph, edge_queries: List[List[Edge]], ow
     remote_answers = mpi.comm.alltoall(answers)
     for remote_answer in remote_answers:
         sample.add_edges_from(remote_answer)
-    mpi.comm.barrier()

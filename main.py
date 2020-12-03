@@ -11,6 +11,7 @@ from dgraph_scaler import scaler
 @click.option('-fs', '--factor-size', default=0.5, type=float)
 @click.option('-p', '--precision', default=0.95, type=float)
 @click.option('-c', '--connect', is_flag=True, )
+@click.option('-st', '--stitching-type', default="all-to-all", type=str)
 @click.option('-nfs', '--merge-nfs', is_flag=True, )
 @click.option('-v', '--verbose', is_flag=True)
 def distributed_sampling(*args, **kwargs):

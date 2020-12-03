@@ -4,10 +4,14 @@ from math import ceil
 import networkx as nx
 
 from dgraph_scaler import distributor, sampler, util, mpi, stitcher, merger
+from dgraph_scaler.stitcher import StitchType
 
 
-def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, precision=0.95, connect=False, merge_nfs=False, verbose=True):
+def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, precision=0.95, connect=False,
+          stitching_type="all-to-all", merge_nfs=False, verbose=True):
     total_t = time.time()
+    # Step X: Parse sticthing type and check if valid
+    stitching_type = StitchType.parse_type(stitching_type)
 
     # Step X: Read distribute edges and load graph
     loading_t = time.time()
@@ -46,7 +50,7 @@ def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, p
         print("Relabeling time:", time.time() - relabeling_t)
     # Step X: Stitch samples locally and distributively
     stitching_t = time.time()
-    stitcher.stitch_samples(samples, bridges)
+    stitcher.stitch_samples(samples, bridges, stitching_type)
     if verbose and mpi.rank == 0:
         print("Stiching time:", time.time() - stitching_t)
     # Step X: Merge distributed samples into master file

@@ -7,7 +7,7 @@ from dgraph_scaler import distributor, sampler, util, mpi, stitcher, merger
 from dgraph_scaler.stitcher import StitchType
 
 
-def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, precision=0.95, connect=False,
+def scale(input_file, output_file, scale_factor, bridges=0.1, sampling_factor=0.5, precision=0.95, connect=False,
           stitching_type="all-to-all", merge_nfs=False, verbose=True):
     if verbose and mpi.rank == 0:
         print("""
@@ -17,11 +17,11 @@ def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, p
 """)
         print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
         print(
-            "Scale factor: {}. Bridges: {}%. Precision: {}%. Factor size: {}. Connect: {}. Stitching:{}. NFS: {}".format(
+            "Scale factor: {}. Bridges: {}%. Precision: {}%. Sampling factor: {}. Connect: {}. Stitching:{}. NFS: {}".format(
                 scale_factor,
                 bridges * 100,
                 precision * 100,
-                factor_size,
+                sampling_factor,
                 connect,
                 stitching_type,
                 merge_nfs), )
@@ -45,8 +45,8 @@ def scale(input_file, output_file, scale_factor, bridges=0.1, factor_size=0.5, p
     nodes_amount = mpi.comm.alltoall([graph.number_of_nodes()] * mpi.size)
     weights = list(map(lambda a: ceil(a / sum(nodes_amount) * 100) / 100.0, nodes_amount))
     # Step X: Split factor into sample rounds
-    factor_size = min(factor_size, scale_factor)
-    factors = [factor_size for _ in range(int(scale_factor / factor_size))]
+    sampling_factor = min(sampling_factor, scale_factor)
+    factors = [sampling_factor for _ in range(int(scale_factor / sampling_factor))]
     remaining_factor = scale_factor - round(sum(factors), 2)
     if remaining_factor:
         factors.append(remaining_factor)

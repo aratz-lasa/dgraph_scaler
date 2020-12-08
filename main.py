@@ -8,7 +8,7 @@ from dgraph_scaler import scaler
 @click.argument("output_file")
 @click.argument("scale_factor", type=float)
 @click.option('-b', '--bridges', default=0.1, type=float)
-@click.option('-fs', '--factor-size', default=0.5, type=float)
+@click.option('-fs', '--sampling-factor', default=0.5, type=float)
 @click.option('-p', '--precision', default=0.95, type=float)
 @click.option('-c', '--connect', is_flag=True, )
 @click.option('-st', '--stitching-type', default="all-to-all", type=str)

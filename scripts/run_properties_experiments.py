@@ -18,18 +18,18 @@ from dgraph_scaler import scaler, mpi
 @click.argument("results_folder")
 @click.argument("output_file")
 @click.argument("measurements", type=int)
-@click.option("-sf", "--scaling-factors", type=float, multiple=True)
+@click.option("-s", "--scaling-factors", type=float, multiple=True)
 @click.option("-e", "--extension", default=None, help="Extension of files that contain edges")
 @click.option("-a", "--append", is_flag=True)
 @click.option('-b', '--bridges', default=0.1, type=float)
-@click.option('-fs', '--factor-size', default=0.5, type=float)
+@click.option('-sf', '--sampling-factor', default=0.5, type=float)
 @click.option('-p', '--precision', default=0.95, type=float)
 @click.option('-c', '--connect', is_flag=True, )
 @click.option('-st', '--stitching-type', default="all-to-all", type=str)
 @click.option('-nfs', '--merge-nfs', is_flag=True, )
 @click.option('-v', '--verbose', is_flag=True)
 def run_properties_experiments(input_file, results_folder, output_file, measurements, scaling_factors, extension,
-                               append, bridges, factor_size, precision, connect, stitching_type, merge_nfs, verbose):
+                               append, bridges, sampling_factor, precision, connect, stitching_type, merge_nfs, verbose):
     if mpi.rank == 0:
         if not os.path.exists(results_folder):
             os.makedirs(results_folder)
@@ -42,7 +42,7 @@ def run_properties_experiments(input_file, results_folder, output_file, measurem
         for i in range(measurements):
             if mpi.rank == 0:
                 print("Running experiment: {} - {}/{}".format(factor, i + 1, measurements), )
-            scaler.scale(input_file, results_folder, factor, bridges, factor_size, precision, connect,stitching_type, merge_nfs,
+            scaler.scale(input_file, results_folder, factor, bridges, sampling_factor, precision, connect, stitching_type, merge_nfs,
                          verbose)
             if mpi.rank == 0:
                 row = get_properties_with_sanppy(extension, results_folder)

@@ -22,7 +22,7 @@ def sample(graph: nx.MultiDiGraph, total_nodes: int, weight: float, partition_ma
         # Step 2: Calculate ownerships
         ownership_lens = distribute_ownerships(sub_sample, ownerships, partition_map)
         sample.add_edges_from(sub_sample.edges)
-    # Step 2: Distributed induction
+    # Step 3: Distributed induction
     distributed_induction(graph, sample, partition_map, ownerships[mpi.rank])
     return sample
 
@@ -51,18 +51,17 @@ def distribute_ownerships(sample: nx.MultiDiGraph, ownerships: List[Set[Vertex]]
 
 def distributed_induction(graph: nx.MultiDiGraph, sample: nx.MultiDiGraph, partition_map: PartitionMap,
                           ownership: Set[Vertex]):
-    # Step 1: Induction on non-sampled edges
-    # Step 1.1: Get non-sampled edges non-owned nodes
+    # Step 1: Get non-sampled edges non-owned nodes
     edge_queries = [[] for _ in range(mpi.size)]
     for edge in filter(lambda e: not sample.has_edge(*e) and sample.has_node(e[0]), graph.edges):
         owners = partition_map.get_owners(edge[1])
         edge_queries[random.choice(owners)].append(edge)  # Select only one of the owners randomly
-    # Step 1.2: Resolve induction of owned nodes
+    # Step 2: Resolve induction of owned nodes
     for edge in edge_queries[mpi.rank]:
         if edge[1] in ownership:
             sample.add_edge(*edge)
     edge_queries[mpi.rank].clear()
-    # Step 1.3: Query each node's owner for
+    # Step 3: Query each node's owner for
     query_inductions(sample, edge_queries, ownership)
 
 
